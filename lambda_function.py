@@ -2,6 +2,8 @@ import json
 import requests
 from utils import getDate
 from sectors import sectors_capacity, sectors_data, additional_sectors_data
+from counter import stadium_capacity, free_seats, not_available_seats
+from unavailable import not_available_sectors
 
 
 def get_data(eventId):
@@ -38,10 +40,24 @@ def get_data(eventId):
 
 def lambda_handler(event, context):
     id = 2250
-    in_sale, not_in_sale, date = get_data(id)
-    print(in_sale, not_in_sale, date)
+
+    try:
+        in_sale, not_in_sale, date = get_data(id)
+        capacity = stadium_capacity(in_sale, not_in_sale)
+        not_available_seats_number = not_available_seats(
+            not_in_sale, not_available_sectors)
+        free_seats_in_sale = free_seats(in_sale)
+    except Exception as e:
+        return {
+            'statusCode': 500,
+            'body': json.dumps({'error': str(e)})
+        }
+
+    sold = capacity - not_available_seats_number - free_seats_in_sale
+    info = f"Number of sold tickets: {sold} ({date})"
+    print(info)
 
     return {
         'statusCode': 200,
-        'body': json.dumps('Hello from Lambda!')
+        'body': json.dumps({'sold': sold, 'timestamp': date, 'info': info}),
     }
