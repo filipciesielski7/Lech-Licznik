@@ -1,30 +1,29 @@
-# Part 4
+# Part 5
 
-## Adding an API Gateway URL
+## Creating KMS key
+
+1. Open the AWS Management Console and navigate to the KMS service.
+2. Click the "Create key" button.
+3. Select "Symmetric key" as the key type and click "Next".
+4. Choose "KMS generated key" as the key material origin and click "Next".
+5. Enter a name for your key (e.g. "Twitter Auth Keys") in the "Alias" field and click "Next".
+6. On the "Define key usage permissions" page, choose role of the lambda function You want to use key in.
+7. Review your key settings and click "Finish".
+8. After creating the key, copy the ARN (Amazon Resource Name) of the key, which can be found on the key details page.
+
+## Encrypting an Environment Variable in Lambda using KMS Key.
+
 1. Open the AWS Management Console and navigate to the Lambda service.
-2. Select the function that you want to add an API Gateway trigger to.
-3. Click on the "Add trigger" button.
-4. Select "API Gateway" as the trigger type.
-5. Select "REST API" as the API type and choose "Create a new API".
-6. Choose the "Open" security option to allow unauthenticated access to your API.
-7. Click on the "Add" button to add the trigger to your Lambda function.
-8. Once the trigger has been added, you will see a new API Gateway icon in the designer view of your Lambda function. Click on this icon to open the API Gateway console.
-9. In the "Method Execution" section of the API Gateway console, select the method you want to add the URL query string parameter to.
-10. Click on the "Method Request" card to open the method request settings.
-11. Scroll down to the "URL Query String Parameters" section and click the "Add query string" button.
-12. Enter the name of the query string parameter you want to add (in this case, "id").
-13. Click the "Save" button to save the changes.
+2. Select the function that you want to add an encrypted environment variable to.
+3. Click on the "Configuration" tab and scroll down to the "Environment variables" section.
+4. Click the "Edit" button to edit the environment variables.
+5. Enter the name of the environment variable you want to encrypt and its value, then click the "Encrypt" checkbox next to the value field.
+6. In the "KMS key ARN" field, paste the ARN of the KMS key you created earlier.
+7. Click the "Save" button to save the encrypted environment variable.
 
-## Handling different invocation methods in AWS Lambda Function
-* The purpose of this code is to check if the event was invoked via API Gateway or through the test button in the Lambda console. When the event is invoked through API Gateway, the id parameter is passed in as a query string parameter, which is retrieved in step 5. If the id parameter is not present in the query string, a 400 Bad Request response is returned.
-* On the other hand, when the event is invoked through the test button in the Lambda console, the id parameter is not passed in as a query string parameter. In this case, a default value of 2250 is assigned to the id variable in step 8. The tweet variable is also set to True to indicate that the event was not invoked through API Gateway.
+## Twitter authentication
 
-## Adding CloudWatch Events Trigger to Lambda Function
-1. Open the AWS Management Console and navigate to the Lambda service.
-2. Select the function that you want to add a trigger to.
-3. Click on the "Add trigger" button.
-4. Select "CloudWatch Events" as the trigger type.
-5. Choose "Create a new rule" for the rule dropdown menu.
-6. In the "Rule name" field, enter a name for your rule.
-7. In the "Schedule expression" field, enter a valid cron expression. You can use tools like Cron Guru to generate a valid expression. (in this case, `*/10 * * * ? *`)
-8. Click on the "Add" button to add the trigger to your Lambda function.
+- This code block is used to retrieve and decrypt an environment variable named twitter_auth_keys that contains authentication keys for Twitter API.
+- The os.environ method is used to retrieve the value of the twitter_auth_keys environment variable. This value is then passed to the boto3.client('kms').decrypt() method to decrypt the value.
+- The decryption process requires the KMS key ID or ARN that was used to encrypt the environment variable. This is automatically handled by the EncryptionContext parameter, which specifies the AWS Lambda function's name.
+- The decrypted value is then loaded as a JSON object using the json.loads() method and stored in the TWITTER_AUTH_KEYS variable. This variable is used to authenticate with the Twitter API using the Tweepy library.

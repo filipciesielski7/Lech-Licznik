@@ -4,6 +4,8 @@ from utils import getDate
 from sectors import sectors_capacity, sectors_data, additional_sectors_data
 from counter import stadium_capacity, free_seats, not_available_seats
 from unavailable import not_available_sectors
+from auth import api
+from twitter import tweet, number_of_followers
 
 
 def get_data(eventId):
@@ -70,7 +72,9 @@ def lambda_handler(event, context):
     print(info)
 
     if(tweet):
-        print("Tweet")
+        follower_count = number_of_followers(1380829797090271233, api)
+        print("Number of followers: ", follower_count)
+        # tweet(info, api)
 
     return {
         'statusCode': 200,
