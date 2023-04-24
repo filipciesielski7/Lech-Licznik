@@ -39,7 +39,19 @@ def get_data(eventId):
 
 
 def lambda_handler(event, context):
-    id = 2250
+    tweet = False
+    if 'path' in event:
+        query_params = event.get('queryStringParameters', {})
+        if query_params:
+            id = query_params.get('id')
+        else:
+            return {
+                'statusCode': 400,
+                'body': json.dumps({'error': 'Missing required parameter: id'})
+            }
+    else:
+        tweet = True
+        id = 2250
 
     try:
         in_sale, not_in_sale, date = get_data(id)
@@ -56,6 +68,9 @@ def lambda_handler(event, context):
     sold = capacity - not_available_seats_number - free_seats_in_sale
     info = f"Number of sold tickets: {sold} ({date})"
     print(info)
+
+    if(tweet):
+        print("Tweet")
 
     return {
         'statusCode': 200,
